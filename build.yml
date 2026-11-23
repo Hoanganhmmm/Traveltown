@@ -1,0 +1,25 @@
+name: build-tthook
+
+on:
+  workflow_dispatch:   # chạy thủ công từ tab Actions
+  push:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build TTHook.dylib (arm64 iOS)
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          echo "SDK: $SDK"
+          clang -arch arm64 -miphoneos-version-min=15.0 -isysroot "$SDK" \
+                -dynamiclib -install_name "@executable_path/Frameworks/TTHook.dylib" \
+                -o TTHook.dylib TTHook.c
+          file TTHook.dylib
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TTHook
+          path: TTHook.dylib
